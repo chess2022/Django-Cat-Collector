@@ -35,3 +35,9 @@ def about(request):
 def cats_index(request):
     cats = Cat.objects.order_by('id')
     return render(request, 'cats/index.html', { 'cats': cats })
+
+def cats_detail(request, cat_id):
+  # get the individual cat
+  cat = Cat.objects.get(id=cat_id)
+  # render template, pass it the cat
+  return render(request, 'cats/detail.html', { 'cat': cat })
