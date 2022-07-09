@@ -2,7 +2,7 @@ from django.shortcuts import render
 # Add the import;  in order to use the HttpResponsefunction, we must import it like the others we've used so far.
 from django.http import HttpResponse
 from .models import Cat
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 # Add the Cat class & list and view function below the imports
 # This is only necessary without an external database!!!
@@ -25,8 +25,17 @@ from django.views.generic.edit import CreateView
 class CatCreate(CreateView):
   model = Cat
   fields = '__all__'
-  #could also write the fields like this (long way):
-  #fields = ['name', 'breed', 'description', 'age']
+  success_url = '/cats/'
+
+class CatUpdate(UpdateView):
+  model = Cat
+  # disallow the renaming of a cat
+  fields = ['breed', 'description', 'age']
+  success_url = '/cats/'
+
+class CatDelete(DeleteView):
+  model = Cat
+  success_url = '/cats/'
 
 # Create your views here.
 
