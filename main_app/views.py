@@ -31,7 +31,6 @@ class CatUpdate(UpdateView):
   model = Cat
   # disallow the renaming of a cat
   fields = ['breed', 'description', 'age']
-  success_url = '/cats/'
 
 class CatDelete(DeleteView):
   model = Cat
