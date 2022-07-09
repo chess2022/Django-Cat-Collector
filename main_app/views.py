@@ -1,7 +1,8 @@
 from django.shortcuts import render
-from .models import Cat
 # Add the import;  in order to use the HttpResponsefunction, we must import it like the others we've used so far.
 from django.http import HttpResponse
+from .models import Cat
+from django.views.generic.edit import CreateView
 
 # Add the Cat class & list and view function below the imports
 # This is only necessary without an external database!!!
@@ -20,6 +21,12 @@ from django.http import HttpResponse
 
 # for raw text or an html string use HttpResponse
 # for full template html file use render
+
+class CatCreate(CreateView):
+  model = Cat
+  fields = '__all__'
+  #could also write the fields like this (long way):
+  #fields = ['name', 'breed', 'description', 'age']
 
 # Create your views here.
 
