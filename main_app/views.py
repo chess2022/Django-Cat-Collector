@@ -22,6 +22,8 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 # for raw text or an html string use HttpResponse
 # for full template html file use render
 
+#Class-based Views are classes defined in the Django framework that we can extend and use instead of view functions.
+
 class CatCreate(CreateView):
   model = Cat
   fields = '__all__'
