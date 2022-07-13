@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
 # Add the import;  in order to use the HttpResponsefunction, we must import it like the others we've used so far.
-from django.http import HttpResponse
-
+# from django.http import HttpResponse
 from main_app.forms import FeedingForm
-from .models import Cat
+from .models import Cat, Toy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView
 
 
 # Add the Cat class & list and view function below the imports
@@ -30,7 +30,8 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 # Define the home view
 def home(request):
-    return HttpResponse('<h1>Hello World /ᐠ｡‸｡ᐟ\ﾉ</h1>')
+    # return HttpResponse('<h1>Hello World /ᐠ｡‸｡ᐟ\ﾉ</h1>')
+    return render(request, 'home.html')
 
 # Define the about view
 def about(request):
@@ -78,3 +79,21 @@ class CatUpdate(UpdateView):
 class CatDelete(DeleteView):
   model = Cat
   success_url = '/cats/'
+
+class ToyList(ListView):
+  model = Toy
+
+class ToyDetail(DetailView):
+  model = Toy
+
+class ToyCreate(CreateView):
+  model = Toy
+  fields = '__all__'
+
+class ToyUpdate(UpdateView):
+  model = Toy
+  fields = ['name', 'color']
+
+class ToyDelete(DeleteView):
+  model = Toy
+  success_url = '/toys/'
