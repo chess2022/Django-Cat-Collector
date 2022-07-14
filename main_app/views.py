@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect
-# Add the import;  in order to use the HttpResponsefunction, we must import it like the others we've used so far.
 # from django.http import HttpResponse
 from main_app.forms import FeedingForm
 from .models import Cat, Toy
