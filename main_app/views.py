@@ -72,7 +72,7 @@ def assoc_toy(request, cat_id, toy_id):
   return redirect('detail', cat_id=cat_id)
 
 def delete_toy(request, cat_id, toy_id):
-  Cat.objects.get(id=cat_id).toy_id.remove(toy_id)
+  Cat.objects.get(id=cat_id).toys.remove(toy_id)
   return redirect('detail', cat_id=cat_id)
 
 #Class-based Views are classes defined in the Django framework that we can extend and use instead of view functions.

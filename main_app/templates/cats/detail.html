@@ -72,11 +72,11 @@
             <span class="card-title">
               A <span style="color: {{ toy.color }}">{{ toy.color }}</span> {{ toy.name }}
               <div class="card-action">
-                {% comment %} <form action="{{cat.toy.remove(toy)}}" method="post">
+                <form action="{% url 'delete_toy' cat.id toy.id %}" method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn">Delete</button>
-                </form> {% endcomment %}
-              <button class="btn"><a href="{{% url 'toys_delete' toy.id %}}">Delete</a> </button>   
+                </form>
+              {% comment %} <button class="btn"><a href="{{% url 'toys_delete' toy.id %}}">Delete</a> </button>    {% endcomment %}
               </div>
             </span>
           </div>
