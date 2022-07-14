@@ -68,9 +68,16 @@
     {% if cat.toys.count %}
       {% for toy in cat.toys.all %}
         <div class="card">
-			<div class="card-content">
-				<span class="card-title">
-					A <span style="color: {{ toy.color }}">{{ toy.color }}</span> {{ toy.name }}
+          <div class="card-content">
+            <span class="card-title">
+              A <span style="color: {{ toy.color }}">{{ toy.color }}</span> {{ toy.name }}
+              <div class="card-action">
+                {% comment %} <form action="{{cat.toy.remove(toy)}}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn">Delete</button>
+                </form> {% endcomment %}
+              <button class="btn"><a href="{{% url 'toys_delete' toy.id %}}">Delete</a> </button>   
+              </div>
             </span>
           </div>
         </div>
@@ -80,5 +87,27 @@
     {% endif %}
   </div>
   <!-- Available toys will come after this line -->
+<div class="col s6">
+  <h3>Available Toys</h3>
+  {% if toys.count %}
+    {% for toy in toys.all %}
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">
+            A <span style="color: {{ toy.color }}">{{ toy.color }}</span> {{ toy.name }}
+          </span>
+        </div>
+        <div class="card-action">
+          <form action="{% url 'assoc_toy' cat.id toy.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn">Add</button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <h5>{{cat.name}} Already Has All Toys Available</h5>
+  {% endif %}
 </div>
-{% endblock %}
+</div>
+  {% endblock %}

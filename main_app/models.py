@@ -39,6 +39,9 @@ class Cat(models.Model):
     def fed_for_today(self):
         return self.feeding_set.filter(date=date.today()).count() >=len(MEALS)
 
+    # def toy_delete(self):
+    #     return reverse('detail', kwargs={'cat_id': self.id})
+
 class Feeding(models.Model):
     date = models.DateField('feeding date')
     meal = models.CharField(

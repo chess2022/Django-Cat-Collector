@@ -44,12 +44,15 @@ def cats_index(request):
 def cats_detail(request, cat_id):
   # get the individual cat
   cat = Cat.objects.get(id=cat_id)
+  # Get the toys the cat doesn't have
+  toys_cat_doesnt_have = Toy.objects.exclude(id__in = cat.toys.all().values_list('id'))
   # instantiate FeedingForm to be rendered in the template
   feeding_form = FeedingForm()
   # render template, pass it the cat
   return render(request, 'cats/detail.html', { 
     'cat': cat,
-    'feeding_form': feeding_form
+    'feeding_form': feeding_form,
+    'toys': toys_cat_doesnt_have
     })
 
 def add_feeding(request, cat_id):
@@ -61,6 +64,15 @@ def add_feeding(request, cat_id):
     new_feeding = form.save(commit=False)
     new_feeding.cat_id = cat_id
     new_feeding.save()
+  return redirect('detail', cat_id=cat_id)
+
+def assoc_toy(request, cat_id, toy_id):
+  # Note that you can pass a toy's id instead of the whole object
+  Cat.objects.get(id=cat_id).toys.add(toy_id)
+  return redirect('detail', cat_id=cat_id)
+
+def delete_toy(request, cat_id, toy_id):
+  Cat.objects.get(id=cat_id).toy_id.remove(toy_id)
   return redirect('detail', cat_id=cat_id)
 
 #Class-based Views are classes defined in the Django framework that we can extend and use instead of view functions.
