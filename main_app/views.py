@@ -4,6 +4,13 @@ from main_app.forms import FeedingForm
 from .models import Cat, Toy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, DetailView
+import uuid
+import boto3
+from .models import Cat, Toy, Photo
+from .forms import FeedingForm
+
+S3_BASE_URL = 'https://s3-us-west-2.amazonaws.com/'
+BUCKET = 'catcollector-cw'
 
 
 # Add the Cat class & list and view function below the imports
@@ -66,6 +73,25 @@ def add_feeding(request, cat_id):
     new_feeding.save()
   return redirect('detail', cat_id=cat_id)
 
+def add_photo(request, cat_id):
+  # photo-file will be the "name" attribute on the <input type="file">
+  photo_file = request.FILES.get('photo-file', None)
+  if photo_file:
+    s3 = boto3.client('s3')
+    # need a unique "key" for S3 / needs image file extension also
+    key = uuid.uuid4().hex[:6] + photo_file.name[photo_file.name.rfind('.'):]
+    # just in case something goes wrong
+    try:
+      s3.upload_fileobj(photo_file, BUCKET, key)
+      # build the full url string
+      url = f"{S3_BASE_URL}{BUCKET}/{key}"
+      # we can assign to cat_id or cat (if you have a cat object)
+      photo = Photo(url=url, cat_id=cat_id)
+      photo.save()
+    except:
+      print('An error occurred')
+  return redirect('detail', cat_id=cat_id)
+
 def assoc_toy(request, cat_id, toy_id):
   # Note that you can pass a toy's id instead of the whole object
   Cat.objects.get(id=cat_id).toys.add(toy_id)
@@ -74,6 +100,7 @@ def assoc_toy(request, cat_id, toy_id):
 def delete_toy(request, cat_id, toy_id):
   Cat.objects.get(id=cat_id).toys.remove(toy_id)
   return redirect('detail', cat_id=cat_id)
+
 
 #Class-based Views are classes defined in the Django framework that we can extend and use instead of view functions.
 
