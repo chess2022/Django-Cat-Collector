@@ -1,13 +1,21 @@
+from curses.ascii import HT
 from django.shortcuts import render, redirect
 # from django.http import HttpResponse
 from main_app.forms import FeedingForm
 from .models import Cat, Toy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, DetailView
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import Http404
+
 import uuid
 import boto3
 from .models import Cat, Toy, Photo
 from .forms import FeedingForm
+
 
 S3_BASE_URL = 'https://s3-us-west-2.amazonaws.com/'
 BUCKET = 'catcollector-cw'
@@ -43,11 +51,32 @@ def home(request):
 def about(request):
     return render(request, 'about.html')
 
+def signup(request):
+  error_message = ''
+  if request.method == 'POST':
+    # This is how to create a 'user' form object
+    # that includes the data from the browser
+    form = UserCreationForm(request.POST)
+    if form.is_valid():
+      user = form.save()
+      login(request, user)
+      return redirect('index')
+    else:
+      error_message = 'Invalid sign up - try again'
+  # A bad POST or a GET request, so render signup.html with an empty form
+  form = UserCreationForm()
+  context = {'form': form, 'error_message': error_message}
+  return render(request, 'registration/signup.html', context)
+
 # Index view
+@login_required
 def cats_index(request):
-    cats = Cat.objects.order_by('id')
+    cats = Cat.objects.filter(user=request.user)
+    # You could also retrieve the logged in user's cats like this
+    # cats = request.user.cat_set.all()
     return render(request, 'cats/index.html', { 'cats': cats })
 
+@login_required
 def cats_detail(request, cat_id):
   # get the individual cat
   cat = Cat.objects.get(id=cat_id)
@@ -62,6 +91,7 @@ def cats_detail(request, cat_id):
     'toys': toys_cat_doesnt_have
     })
 
+@login_required
 def add_feeding(request, cat_id):
   # create the ModelForm using the data in request.POST
   form = FeedingForm(request.POST)
@@ -73,6 +103,7 @@ def add_feeding(request, cat_id):
     new_feeding.save()
   return redirect('detail', cat_id=cat_id)
 
+@login_required
 def add_photo(request, cat_id):
   # photo-file will be the "name" attribute on the <input type="file">
   photo_file = request.FILES.get('photo-file', None)
@@ -92,11 +123,13 @@ def add_photo(request, cat_id):
       print('An error occurred')
   return redirect('detail', cat_id=cat_id)
 
+@login_required
 def assoc_toy(request, cat_id, toy_id):
   # Note that you can pass a toy's id instead of the whole object
   Cat.objects.get(id=cat_id).toys.add(toy_id)
   return redirect('detail', cat_id=cat_id)
 
+@login_required
 def delete_toy(request, cat_id, toy_id):
   Cat.objects.get(id=cat_id).toys.remove(toy_id)
   return redirect('detail', cat_id=cat_id)
@@ -104,34 +137,46 @@ def delete_toy(request, cat_id, toy_id):
 
 #Class-based Views are classes defined in the Django framework that we can extend and use instead of view functions.
 
-class CatCreate(CreateView):
+class CatCreate(LoginRequiredMixin, CreateView):
   model = Cat
-  fields = '__all__'
+  fields = ['name', 'breed', 'description', 'age']
+  # This inherited method is called when a valid cat form is being submitted
+  def form_valid(self, form):
+    # Assign the logged in user 
+    form.instance.user = self.request.user
+    # Let the createView do its job
+    return super().form_valid(form)
   success_url = '/cats/'
 
-class CatUpdate(UpdateView):
+class CatUpdate(LoginRequiredMixin, UpdateView):
   model = Cat
   # disallow the renaming of a cat
   fields = ['breed', 'description', 'age']
 
-class CatDelete(DeleteView):
+class CatDelete(LoginRequiredMixin, DeleteView):
   model = Cat
   success_url = '/cats/'
+  def get_object(self, queryset=None):
+    # Hook to ensure cat's user property is request.user
+    cat = super(CatDelete, self).get_object()
+    if not cat.user == self.request.user:
+      raise Http404
+    return cat
 
-class ToyList(ListView):
+class ToyList(LoginRequiredMixin, ListView):
   model = Toy
 
-class ToyDetail(DetailView):
+class ToyDetail(LoginRequiredMixin, DetailView):
   model = Toy
 
-class ToyCreate(CreateView):
+class ToyCreate(LoginRequiredMixin, CreateView):
   model = Toy
   fields = '__all__'
 
-class ToyUpdate(UpdateView):
+class ToyUpdate(LoginRequiredMixin, UpdateView):
   model = Toy
   fields = ['name', 'color']
 
-class ToyDelete(DeleteView):
+class ToyDelete(LoginRequiredMixin, DeleteView):
   model = Toy
   success_url = '/toys/'

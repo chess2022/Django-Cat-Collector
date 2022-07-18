@@ -2,6 +2,7 @@ from django.db import models
 # Import the reverse function
 from django.urls import reverse
 from datetime import date
+from django.contrib.auth.models import User
 
 # A tuple of 2-tuples for Field.choices
 MEALS = (
@@ -29,6 +30,7 @@ class Cat(models.Model):
     age = models.IntegerField()
     # Add the M:M relationship
     toys = models.ManyToManyField(Toy)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
